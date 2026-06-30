@@ -5,23 +5,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Article
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ssasa6.f1fanapp.ui.screens.ChampionshipScreen
-import com.ssasa6.f1fanapp.ui.theme.F1Dark
-import com.ssasa6.f1fanapp.ui.theme.F1FanAppTheme
+import com.ssasa6.f1fanapp.data.*
+import com.ssasa6.f1fanapp.ui.appStrings
+import com.ssasa6.f1fanapp.ui.screens.*
+import com.ssasa6.f1fanapp.ui.theme.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,53 +41,71 @@ private data class NavItem(val label: String, val icon: ImageVector)
 
 @Composable
 fun F1AppMain() {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab    by remember { mutableStateOf(0) }
+    var selectedTeamId by remember { mutableStateOf("mclaren") }
+    var isKorean       by remember { mutableStateOf(false) }
+
+    val selectedTeam = teamMap[selectedTeamId] ?: allTeams.first()
+    val accent = selectedTeam.color
+    val s = appStrings(isKorean)
 
     val navItems = listOf(
-        NavItem("Championship", Icons.Default.EmojiEvents),
-        NavItem("Calendar", Icons.Default.DateRange),
-        NavItem("News", Icons.Default.Article),
-        NavItem("Profile", Icons.Default.Person),
+        NavItem(s.navHome,      Icons.Default.Home),
+        NavItem(s.navRaces,     Icons.Default.DateRange),
+        NavItem(s.navStandings, Icons.Default.EmojiEvents),
+        NavItem(s.navNews,      Icons.Default.Article),
+        NavItem(s.navMyTeam,    Icons.Default.Person),
     )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = PwBg,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                navItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label, fontSize = 11.sp) }
-                    )
+            Column(modifier = Modifier.fillMaxWidth().background(PwNavBg)) {
+                Divider(color = Color.White.copy(alpha = 0.06f), thickness = 1.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 6.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    navItems.forEachIndexed { index, item ->
+                        val selected = selectedTab == index
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { selectedTab = index }
+                                .padding(vertical = 4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(item.icon, contentDescription = item.label,
+                                tint = if (selected) accent else PwNavInactive,
+                                modifier = Modifier.size(22.dp))
+                            Text(item.label, fontSize = 10.sp,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                                color = if (selected) accent else PwNavInactive)
+                        }
+                    }
                 }
             }
         }
     ) { innerPadding ->
+        val bottomPad = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         when (selectedTab) {
-            0 -> ChampionshipScreen(modifier = Modifier.padding(innerPadding))
-            else -> PlaceholderScreen(
-                label = navItems[selectedTab].label,
-                modifier = Modifier.padding(innerPadding)
+            0 -> HomeScreen(
+                selectedTeam = selectedTeam,
+                onTeamSelected = { selectedTeamId = it },
+                isKorean = isKorean,
+                onLanguageToggle = { isKorean = !isKorean },
+                modifier = bottomPad
             )
+            1 -> RacesScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
+            2 -> StandingsScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
+            3 -> NewsScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
+            4 -> TeamScreen(selectedTeam = selectedTeam, isKorean = isKorean, modifier = bottomPad)
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(label: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(F1Dark),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = Color.Gray,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
