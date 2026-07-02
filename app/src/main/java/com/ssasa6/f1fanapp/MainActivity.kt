@@ -44,10 +44,23 @@ fun F1AppMain() {
     var selectedTab    by remember { mutableStateOf(0) }
     var selectedTeamId by remember { mutableStateOf("mclaren") }
     var isKorean       by remember { mutableStateOf(false) }
+    var selectedRace   by remember { mutableStateOf<com.ssasa6.f1fanapp.data.Race?>(null) }
 
     val selectedTeam = teamMap[selectedTeamId] ?: allTeams.first()
     val accent = selectedTeam.color
     val s = appStrings(isKorean)
+
+    // Race detail screen (full-screen overlay, no bottom nav)
+    val race = selectedRace
+    if (race != null) {
+        RaceWeekendScreen(
+            race = race,
+            accent = accent,
+            isKorean = isKorean,
+            onBack = { selectedRace = null },
+        )
+        return
+    }
 
     val navItems = listOf(
         NavItem(s.navHome,      Icons.Default.Home),
@@ -102,7 +115,7 @@ fun F1AppMain() {
                 onLanguageToggle = { isKorean = !isKorean },
                 modifier = bottomPad
             )
-            1 -> RacesScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
+            1 -> RacesScreen(accent = accent, isKorean = isKorean, onRaceClick = { selectedRace = it }, modifier = bottomPad)
             2 -> StandingsScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
             3 -> NewsScreen(accent = accent, isKorean = isKorean, modifier = bottomPad)
             4 -> TeamScreen(selectedTeam = selectedTeam, isKorean = isKorean, modifier = bottomPad)

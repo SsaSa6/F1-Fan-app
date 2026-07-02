@@ -177,3 +177,37 @@ val britishGpSessions = listOf(
     Triple("SAT · 04 JUL", "Qualifying",  "15:00"),
     Triple("SUN · 05 JUL", "Grand Prix",  "15:00"),
 )
+
+data class SessionSlot(
+    val day: String,
+    val nameEn: String,
+    val nameKo: String,
+    val time: String,
+    val isRace: Boolean = false,
+)
+
+private fun Race.weekendDays(): Triple<String, String, String> {
+    if (code == "MXC") return Triple("FRI · 30 OCT", "SAT · 31 OCT", "SUN · 01 NOV")
+    val parts = date.split("–")
+    if (parts.size != 2) return Triple("FRI", "SAT", "SUN")
+    val startDay = parts[0].trim().toIntOrNull() ?: return Triple("FRI", "SAT", "SUN")
+    val endParts = parts[1].trim().split(" ")
+    val endDay   = endParts[0].toIntOrNull() ?: return Triple("FRI", "SAT", "SUN")
+    val month    = endParts.getOrElse(1) { "" }
+    return Triple(
+        "FRI · ${startDay.toString().padStart(2, '0')} $month",
+        "SAT · ${(startDay + 1).toString().padStart(2, '0')} $month",
+        "SUN · ${endDay.toString().padStart(2, '0')} $month",
+    )
+}
+
+fun Race.weekendSchedule(): List<SessionSlot> {
+    val (fri, sat, sun) = weekendDays()
+    return listOf(
+        SessionSlot(fri, "Practice 1", "프랙티스 1", "12:30"),
+        SessionSlot(fri, "Practice 2", "프랙티스 2", "16:00"),
+        SessionSlot(sat, "Practice 3", "프랙티스 3", "11:30"),
+        SessionSlot(sat, "Qualifying",  "예선",       "15:00"),
+        SessionSlot(sun, "Grand Prix",  "결승",       "15:00", isRace = true),
+    )
+}

@@ -16,7 +16,7 @@ import com.ssasa6.f1fanapp.ui.appStrings
 import com.ssasa6.f1fanapp.ui.theme.*
 
 @Composable
-fun RacesScreen(accent: Color, isKorean: Boolean, modifier: Modifier = Modifier) {
+fun RacesScreen(accent: Color, isKorean: Boolean, onRaceClick: (Race) -> Unit, modifier: Modifier = Modifier) {
     val s     = appStrings(isKorean)
     val done  = raceCalendar.count { it.status == "done" }
     val total = raceCalendar.size
@@ -53,7 +53,7 @@ fun RacesScreen(accent: Color, isKorean: Boolean, modifier: Modifier = Modifier)
                                 "next" -> accent; "done" -> Color(0xFFC9C9CF); else -> PwTextFaint
                             }
                             if (i > 0) Divider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
-                            Box(modifier = Modifier.fillMaxWidth().background(if (isNext) Color.White.copy(alpha = 0.05f) else Color.Transparent).graphicsLayer(alpha = if (isDone) 0.55f else 1f)) {
+                            Box(modifier = Modifier.fillMaxWidth().clickable { onRaceClick(r) }.background(if (isNext) Color.White.copy(alpha = 0.05f) else Color.Transparent).graphicsLayer(alpha = if (isDone) 0.55f else 1f)) {
                                 if (isNext) Box(Modifier.width(3.dp).matchParentSize().background(accent))
                                 Row(
                                     modifier = Modifier.fillMaxWidth().padding(start = if (isNext) 11.dp else 14.dp, top = 11.dp, bottom = 11.dp, end = 14.dp),
