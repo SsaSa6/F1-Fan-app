@@ -5,20 +5,29 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Red accent stripe at top -->
-    <path
-        android:fillColor="#E8002D"
-        android:pathData="M18,20 L90,20 L90,29 L18,29 Z" />
-
-    <!-- P letter (even-odd for hollow bowl) -->
+    <!-- F — left vertical bar -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillType="evenOdd"
-        android:pathData="M18,34 L18,84 L27,84 L27,58 L46,58 L46,34 Z M27,42 L27,51 L37,51 L37,42 Z" />
+        android:pathData="M15,27 L26,27 L26,81 L15,81 Z" />
 
-    <!-- W letter -->
+    <!-- F — top horizontal bar (right edge angled → speed arrow upper edge) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M56,34 L61,84 L72,55 L83,84 L88,34 L80,34 L72,65 L64,34 Z" />
+        android:pathData="M15,27 L55,27 L62,38 L15,38 Z" />
+
+    <!-- F — middle horizontal bar (angled right edge → arrow lower edge) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M15,50 L44,50 L53,60 L15,60 Z" />
+
+    <!-- 1 — top-left serif block -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,27 L65,27 L65,38 L55,38 Z" />
+
+    <!-- 1 — main vertical stem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M65,27 L83,27 L83,81 L65,81 Z" />
 
 </vector>

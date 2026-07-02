@@ -67,7 +67,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("PITWALL", fontWeight = FontWeight.Black, fontSize = 23.sp, color = PwText)
+                    Text("F1 FAN", fontWeight = FontWeight.Black, fontSize = 23.sp, color = PwText)
                     Box(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(accent).padding(horizontal = 6.dp, vertical = 2.dp)) {
                         Text("'26", fontWeight = FontWeight.Bold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = Color.Black)
                     }
