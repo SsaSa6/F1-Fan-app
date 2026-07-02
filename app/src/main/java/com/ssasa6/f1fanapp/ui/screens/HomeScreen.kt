@@ -1,5 +1,6 @@
 package com.ssasa6.f1fanapp.ui.screens
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -31,8 +32,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val s       = appStrings(isKorean)
-    val accent  = selectedTeam.color
-    val accent2 = selectedTeam.color2
+    val accent  by animateColorAsState(selectedTeam.color,  animationSpec = tween(350), label = "accent")
+    val accent2 by animateColorAsState(selectedTeam.color2, animationSpec = tween(350), label = "accent2")
 
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { delay(1000); now = System.currentTimeMillis() } }
@@ -96,18 +97,21 @@ fun HomeScreen(
             LazyRow(contentPadding = PaddingValues(horizontal = 18.dp, vertical = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(allTeams) { team ->
                     val sel = team.id == selectedTeam.id
+                    val chipBg  by animateColorAsState(if (sel) team.color else Color.Transparent, tween(250), label = "chipBg")
+                    val chipTxt by animateColorAsState(if (sel) Color.Black else PwText,           tween(250), label = "chipTxt")
+                    val chipDot by animateColorAsState(if (sel) Color.Black else team.color,       tween(250), label = "chipDot")
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(11.dp))
                             .border(1.5.dp, team.color, RoundedCornerShape(11.dp))
-                            .background(if (sel) team.color else Color.Transparent)
+                            .background(chipBg)
                             .clickable { onTeamSelected(team.id) }
                             .padding(horizontal = 13.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(7.dp)
                     ) {
-                        Box(Modifier.size(7.dp).background(if (sel) Color.Black else team.color, CircleShape))
-                        Text(team.short, fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = if (sel) Color.Black else PwText, letterSpacing = 0.3.sp)
+                        Box(Modifier.size(7.dp).background(chipDot, CircleShape))
+                        Text(team.short, fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = chipTxt, letterSpacing = 0.3.sp)
                     }
                 }
             }
@@ -181,21 +185,63 @@ fun HomeScreen(
         item {
             Text(s.myTeamLabel, modifier = Modifier.padding(start = 18.dp, bottom = 10.dp), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = PwText)
             Box(
-                modifier = Modifier.padding(horizontal = 14.dp).clip(RoundedCornerShape(18.dp))
-                    .background(Brush.linearGradient(135f, listOf(accent, Color.White.copy(alpha = 0.04f)))).padding(1.5.dp)
+                modifier = Modifier
+                    .padding(horizontal = 14.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(PwCard)
+                    .border(1.dp, accent.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
             ) {
-                Column(modifier = Modifier.clip(RoundedCornerShape(16.5.dp)).fillMaxWidth().background(PwSurface2).padding(horizontal = 18.dp, vertical = 16.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column {
-                            Text(selectedTeam.tName(isKorean), fontWeight = FontWeight.Black, fontSize = 21.sp, color = accent, letterSpacing = (-0.4).sp)
-                            Text(selectedTeam.tFull(isKorean), fontSize = 11.5.sp, color = PwTextSub)
+                Column {
+                    // ── Colored header ───────────────────────────────────────
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Brush.horizontalGradient(listOf(accent.copy(alpha = 0.28f), Color.Transparent)))
+                    ) {
+                        // Left accent stripe
+                        Box(Modifier.width(4.dp).matchParentSize().background(accent))
+                        // Watermark team code
+                        Row(
+                            Modifier.matchParentSize().padding(end = 14.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                selectedTeam.short,
+                                fontSize = 62.sp,
+                                fontWeight = FontWeight.Black,
+                                color = accent.copy(alpha = 0.10f),
+                                letterSpacing = (-2).sp,
+                            )
                         }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text("P$constrPos", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = PwText)
-                            Text(s.constructorsLabel, fontSize = 9.sp, color = PwTextDim, letterSpacing = 0.5.sp)
+                        // Team info
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(start = 18.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(selectedTeam.tName(isKorean), fontWeight = FontWeight.Black, fontSize = 23.sp, color = PwText, letterSpacing = (-0.5).sp)
+                                Text(selectedTeam.tFull(isKorean), fontSize = 11.sp, color = PwTextSub, modifier = Modifier.padding(top = 3.dp))
+                                Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                                    Column {
+                                        Text("P$constrPos", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 19.sp, color = accent)
+                                        Text(s.constructorsLabel, fontSize = 8.sp, color = PwTextDim, letterSpacing = 0.5.sp)
+                                    }
+                                    Column {
+                                        Text("${selectedTeam.pts}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 19.sp, color = PwText)
+                                        Text(s.ptsLabel, fontSize = 8.sp, color = PwTextDim, letterSpacing = 0.5.sp)
+                                    }
+                                }
+                            }
                         }
                     }
-                    Row(Modifier.padding(top = 14.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+
+                    Divider(color = Color.White.copy(alpha = 0.05f))
+
+                    // ── Drivers ──────────────────────────────────────────────
+                    Row(Modifier.padding(12.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         myDrivers.take(2).forEach { d ->
                             Column(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = 0.04f)).padding(11.dp)) {
                                 Text("#${d.number}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = accent)
